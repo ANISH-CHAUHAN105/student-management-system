@@ -1,0 +1,61 @@
+student-erp-frontend/
+├─ app/
+│  ├─ layout.js                    # Global layout
+│  ├─ globals.css                  # Global CSS
+│  ├─ page.js                      # Landing/home page
+│
+│  ├─ student/                     # Student-only routes (Protected)
+│  │  ├─ register/page.js          # Student registration page
+│  │  ├─ dashboard/page.js         # Student dashboard/home
+│  │  ├─ admissions/page.js        # Admissions page
+│  │  ├─ fees/page.js              # Fees page
+│  │  ├─ hostel/page.js            # Hostel page
+│  │  ├─ exams/page.js             # Exams page
+│  │  └─ login/page.js             # Student login page
+│
+│  ├─ faculty/                     # Faculty-only routes (Protected)
+│  │  ├─ register/page.js          # Faculty registration page
+│  │  ├─ dashboard/page.js         # Faculty dashboard/home
+│  │  └─ login/page.js             # Faculty login page
+│
+│  ├─ librarian/                   # Librarian-only routes (Protected)
+│  │  ├─ register/page.js          # Librarian registration page
+│  │  ├─ dashboard/page.js         # Librarian dashboard/home
+│  │  └─ login/page.js             # Librarian login page
+│
+│  ├─ admin/                       # Admin-only routes (Protected)
+│  │  ├─ dashboard/page.js         # Admin dashboard/home
+│  │  └─ login/page.js             # Admin login page
+│
+├─ components/
+│  ├─ Header.js                    # Header with theme toggle & role-based nav
+│  ├─ Footer.js                    # Footer with links + social icons
+│  ├─ ThemeToggle.js               # Dark/Light mode toggle
+│  ├─ ChatBotWidget.js             # Chatbot embeded
+│  ├─ DashboardStats.js            # Stats cards with animated counters
+│  ├─ HowItWorks.js                # How It Works step cards
+│  └─ AuthForm.js                  # Auth form for register, login
+│
+├─ lib/
+│  ├─ api/                         # All API requests organized by module
+│  │  ├─ student.js                # Student-related APIs (register, login etc.)
+│  │  ├─ faculty.js                # Faculty-specific APIs (courses, exams, etc.)
+|  |  ├─ librarian.js              # Librarian-specific APIs (book approval, etc.)
+│  │  └─ admin.js                  # Admin-specific APIs (user approval, etc.)
+│  └─ utils.js                     # Utility functions (date formatting, validation, etc.)
+│
+├─ utils/
+│  ├─ auth.js                      # Add basicAuth to all requests
+|
+├─ styles/
+│  ├─ theme.css                    # Custom theme + dark/light variables
+│  └─ tailwind.css                  # Tailwind imports + animations
+│
+├─ public/                          # Images, icons, static assets
+│
+├─ .env.local                       # Environment variables (API URLs, keys)
+├─ node_modules/
+├─ package.json
+├─ tailwind.config.js
+├─ next.config.js
+└─ README.md
