@@ -6,14 +6,17 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+// Client-side API imports (SAFE)
+import { loginLibrarian } from "@/lib/api/librarian";
+
 export default function AuthForm({
   role,
   type,
   fields,
   redirectAfter,
-  apiFunction, // unified API function for login/register
 }) {
   const router = useRouter();
+
   const [formData, setFormData] = useState(
     fields.reduce((acc, field) => ({ ...acc, [field]: "" }), {})
   );
@@ -22,8 +25,9 @@ export default function AuthForm({
   const [successMessage, setSuccessMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (field, value) =>
-    setFormData({ ...formData, [field]: value });
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,38 +36,32 @@ export default function AuthForm({
     setSuccessMessage("");
 
     try {
-      if (!apiFunction || typeof apiFunction !== "function") {
-        throw new Error("No apiFunction provided to AuthForm");
+      let response;
+
+      // 🔐 Dispatch API call based on role & type
+      if (role === "Librarian" && type === "Login") {
+        response = await loginLibrarian(formData);
+      } else {
+        throw new Error("Unsupported authentication operation");
       }
 
-      console.log(`Submitting ${type} form for role: ${role}`);
-      console.log("📦 Payload:", formData);
+      console.log("✅ API response:", response);
 
-      // Call API function with the form data object
-      const res = await apiFunction(formData);
-      console.log("✅ API response:", res);
-
-      // Success handling
-      setSuccessMessage(`${type} successful!`);
-      setFormData(fields.reduce((acc, field) => ({ ...acc, [field]: "" }), {}));
-
-      // Save role to localStorage
+      setSuccessMessage(`${type} successful`);
       localStorage.setItem("role", role.toLowerCase());
-
-      // Redirect after success
       router.push(redirectAfter);
     } catch (err) {
-      console.error("🚨 Error during API call:", err);
-      setError(err.message || `${type} failed`);
+      console.error("🚨 Auth error:", err);
+      setError(err?.message || `${type} failed`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background dark:bg-background transition-colors duration-300">
-      <div className="card shadow-2xl rounded-3xl p-6 sm:p-10 md:p-12 lg:p-16 w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl animate-fadeIn">
-        <h1 className="text-3xl md:text-4xl font-bold mb-4 text-center text-foreground">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="card shadow-2xl rounded-3xl p-6 sm:p-10 w-full max-w-xl">
+        <h1 className="text-3xl font-bold mb-6 text-center">
           {role} {type}
         </h1>
 
@@ -74,13 +72,14 @@ export default function AuthForm({
 
         <form
           onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-6 md:gap-x-8"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
           {fields.map((field) => (
             <div key={field} className="relative flex flex-col">
-              <label className="mb-2 text-sm md:text-base font-medium text-foreground">
-                {field.charAt(0).toUpperCase() + field.slice(1)}
+              <label className="mb-2 font-medium capitalize">
+                {field}
               </label>
+
               <input
                 type={
                   field === "password"
@@ -91,41 +90,30 @@ export default function AuthForm({
                 }
                 value={formData[field]}
                 onChange={(e) => handleChange(field, e.target.value)}
-                placeholder={`Enter your ${field}`}
-                autoComplete={
-                  field === "password"
-                    ? type === "Login"
-                      ? "current-password"
-                      : "new-password"
-                    : field === "email"
-                    ? "email"
-                    : field === "contact"
-                    ? "tel"
-                    : "name"
-                }
-                className={`px-4 py-3 md:py-4 rounded-lg border border-border bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
+                className={`px-4 py-3 rounded-lg border ${
                   field === "password" ? "pr-10" : ""
                 }`}
                 required
               />
+
               {field === "password" && (
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-11 text-muted-foreground"
                 >
-                  {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               )}
             </div>
           ))}
 
-          <div className="md:col-span-2 mt-4">
+          <div className="md:col-span-2">
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 md:py-4 rounded-lg font-semibold text-lg md:text-xl text-primary-foreground bg-primary hover:bg-primary/90 transition-all ${
-                loading ? "cursor-not-allowed opacity-70" : ""
+              className={`w-full py-3 rounded-lg font-semibold text-lg bg-primary text-primary-foreground ${
+                loading ? "opacity-70 cursor-not-allowed" : ""
               }`}
             >
               {loading ? `${type}ing...` : type}
